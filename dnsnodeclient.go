@@ -2,9 +2,11 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strings"
 )
 
 type Tsig struct {
@@ -49,7 +51,7 @@ type Zonestatus struct {
 
 const NETNOD_BASE_URL = "https://dnsnodeapi.netnod.se/apiv3/"
 
-func DnsnodeMakeRequest(url string, method string) (*http.Response, error) {
+func DnsnodeMakeRequest(url string, method string, body string) (*http.Response, error) {
 	client := http.Client{}
 	req, err := http.NewRequest(method, url, nil)
 	if err != nil {
@@ -61,10 +63,22 @@ func DnsnodeMakeRequest(url string, method string) (*http.Response, error) {
 		"Authorization": {"Token " + DNSNODE_TOKEN},
 	}
 
+	// add body if method is POST
+	if method == "POST" {
+		req.Body = ioutil.NopCloser(strings.NewReader(body))
+	}
+
 	res, err := client.Do(req)
 	// check http status
-	if res.StatusCode != 200 {
-		log.Fatal("HTTP status code: ", res.StatusCode, " for url: ", url, " method: ", method)
+	if res.StatusCode < 200 || res.StatusCode > 299 {
+		// get the response body
+		body, _ := ioutil.ReadAll(res.Body)
+		stringbody := string(body)
+		log.Println("HTTP status code: ", res.StatusCode, " for url: ", url, " method: ", method, " body: ", stringbody)
+
+		// return stringbody as errormessage
+		return nil, errors.New(stringbody)
+
 	}
 	return res, err
 
@@ -74,7 +88,7 @@ func DnsnodeGetZone(zonename string) Zone {
 
 	url := NETNOD_BASE_URL + "zone/" + zonename
 
-	res, err := DnsnodeMakeRequest(url, "GET")
+	res, err := DnsnodeMakeRequest(url, "GET", "")
 	// handle error
 	if err != nil {
 		log.Fatal(err)
@@ -96,7 +110,7 @@ func DnsnodeGetZone(zonename string) Zone {
 
 func DnsnodeGetAllZones() []Zone {
 	url := NETNOD_BASE_URL + "zone/"
-	res, err := DnsnodeMakeRequest(url, "GET")
+	res, err := DnsnodeMakeRequest(url, "GET", "")
 	// handle error
 	if err != nil {
 		log.Fatal(err)
@@ -119,7 +133,7 @@ func DnsnodeZoneStatus(zonename string) Zonestatus {
 
 	url := NETNOD_BASE_URL + "status/" + zonename
 
-	res, err := DnsnodeMakeRequest(url, "GET")
+	res, err := DnsnodeMakeRequest(url, "GET", "")
 	// handle error
 	if err != nil {
 		log.Fatal(err)
@@ -137,4 +151,31 @@ func DnsnodeZoneStatus(zonename string) Zonestatus {
 	}
 	return zonestatus
 
+}
+
+func DnsnodeCreateZone(zonename string, endcustomer string, masters []Master, product string) (bool, error) {
+	url := NETNOD_BASE_URL + "zone/"
+
+	zone := Zone{
+		Name:        zonename,
+		Masters:     masters,
+		Product:     product,
+		Endcustomer: endcustomer,
+	}
+
+	zoneJson, err := json.Marshal(zone)
+	if err != nil {
+		return false, err
+	}
+
+	// log tze zoneJson
+	log.Println(string(zoneJson))
+
+	_, err = DnsnodeMakeRequest(url, "POST", string(zoneJson))
+
+	// handle error
+	if err != nil {
+		return false, err
+	}
+	return true, nil
 }

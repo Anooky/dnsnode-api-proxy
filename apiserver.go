@@ -41,3 +41,38 @@ func GetZoneStatus(context *gin.Context) {
 	context.IndentedJSON(http.StatusOK, zonestatus)
 
 }
+
+func CreateZone(context *gin.Context) {
+	// parse zone from request body
+	var zone Zone
+	if err := context.ShouldBindJSON(&zone); err != nil {
+		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Bad request [Invalid JSON]"})
+		return
+	}
+
+	// force endcustomer to be the one from the context
+	zone.Endcustomer = context.MustGet("endcustomer").(string)
+
+	// force product to be the one from the context
+	zone.Product = context.MustGet("forcedproduct").(string)
+
+	// force masters to be the ones from the context
+	zone.Masters = context.MustGet("forcedmasters").([]Master)
+
+	// create zone
+	ok, err := DnsnodeCreateZone(zone.Name, zone.Endcustomer, zone.Masters, zone.Product)
+
+	// check if zone was created
+	if !ok {
+		// Log error
+		Log("Error creating zone: " + zone.Name + " Error: " + err.Error())
+		context.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Internal server error: " + err.Error()})
+		return
+	}
+	// return success message in body
+	context.IndentedJSON(http.StatusCreated, gin.H{"message": "Zone created"})
+
+	// add zone to cache
+	RefreshZoneInCache(zone.Name)
+
+}
