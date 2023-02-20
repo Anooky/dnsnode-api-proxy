@@ -103,3 +103,15 @@ func DeleteZone(context *gin.Context) {
 	RemoveZoneFromCache(zonename)
 
 }
+
+func GetZones(context *gin.Context) {
+	// get endcustomer from context
+	endcustomer := context.MustGet("endcustomer").(string)
+
+	// get zones from cache
+	zones := GetZonesFromCache(endcustomer)
+
+	// return zones
+	context.IndentedJSON(http.StatusOK, zones)
+
+}

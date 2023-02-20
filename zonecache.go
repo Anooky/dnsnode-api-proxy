@@ -28,6 +28,16 @@ func GetZoneFromCache(zonename string) Zone {
 	return ZONECACHE[zonename]
 }
 
+func GetZonesFromCache(endcustomer string) []Zone {
+	var zones []Zone
+	for _, zone := range ZONECACHE {
+		if zone.Endcustomer == endcustomer {
+			zones = append(zones, zone)
+		}
+	}
+	return zones
+}
+
 func RefreshZoneInCache(zonename string) {
 	zone := DnsnodeGetZone(zonename)
 	ZONECACHE[zonename] = zone
