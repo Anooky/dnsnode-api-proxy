@@ -12,6 +12,18 @@ func TokenAuthMapper() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// get Bearer Token from header
 		authHeader := c.GetHeader("Authorization")
+
+		// abort if no token is found
+		if authHeader == "" {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized [No Token provided]"})
+			return
+		}
+
+		// abort if token is not valid
+		if !strings.HasPrefix(authHeader, "Token ") {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized	[Token not valid]"})
+			return
+		}
 		token := strings.Split(authHeader, " ")[1]
 
 		// check token against config
@@ -21,23 +33,31 @@ func TokenAuthMapper() gin.HandlerFunc {
 		customerConfig, ok := CONFIG.CustomerConfigs[token]
 
 		if !ok {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized [Token not found]"})
 			return
 		}
 
 		// check ip against allowedipranges
 		// if ip is not found, return 401
+		clientip := c.ClientIP()
+		parsedclientip := net.ParseIP(clientip)
 		ipallowed := false
 		for _, ipRange := range customerConfig.AllowedIPRanges {
-			clientip := c.ClientIP()
-			parsedclientip := net.ParseIP(clientip)
-			if ipRange.Contains(parsedclientip) {
+			// parse iprange into ipnet using parseCIDR
+			_, ipnet, err := net.ParseCIDR(ipRange)
+			if err != nil {
+				Log("Error parsing IP range in config: " + ipRange)
+				continue
+			}
+
+			if ipnet.Contains(parsedclientip) {
 				ipallowed = true
 				break
 			}
 		}
 		if !ipallowed {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+			Log("IP not allowed: " + c.ClientIP() + " for endcustomer: " + customerConfig.Endcustomer)
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized [IP not allowed]"})
 			return
 		}
 

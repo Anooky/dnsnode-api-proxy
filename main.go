@@ -14,6 +14,7 @@ func main() {
 	// read configfile
 	Log("Reading configfile...")
 	readConfigFile()
+	Log("Loaded configuration for " + fmt.Sprint(len(CONFIG.CustomerConfigs)) + " customers.")
 
 	// update zone cache
 	Log("Updating zone cache...")
@@ -30,10 +31,10 @@ func main() {
 	router.Use(gin.Recovery())
 
 	// define routes
-	//router.GET("/apiv3/status/:zonename", GetZoneStatus)
+	router.GET("/apiv3/status/:zonename", GetZoneStatus)
 
 	// start server
 	port := 8080
 	Log("Starting API Server on port " + fmt.Sprint(port) + "...")
-	router.Run("localhost:" + fmt.Sprint(port))
+	router.Run("0.0.0.0:" + fmt.Sprint(port))
 }

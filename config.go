@@ -3,18 +3,17 @@ package main
 import (
 	"encoding/json"
 	"io/ioutil"
-	"net"
 )
 
 var DNSNODE_TOKEN string
 var CONFIG Configfile
 
 type CustomerConfig struct {
-	Token           string       `json:"token"`
-	Endcustomer     string       `json:"endcustomer"`
-	ForcedMasters   []Master     `json:"forcedmasters"`
-	ForcedProduct   string       `json:"forcedproduct"`
-	AllowedIPRanges []*net.IPNet `json:"allowedipranges"`
+	Token           string   `json:"token"`
+	Endcustomer     string   `json:"endcustomer"`
+	ForcedMasters   []Master `json:"forcedmasters"`
+	ForcedProduct   string   `json:"forcedproduct"`
+	AllowedIPRanges []string `json:"allowedipranges"`
 }
 
 // use customer's token as key for customerconfig
