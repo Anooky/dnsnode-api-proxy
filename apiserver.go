@@ -76,3 +76,30 @@ func CreateZone(context *gin.Context) {
 	RefreshZoneInCache(zone.Name)
 
 }
+
+func DeleteZone(context *gin.Context) {
+	zonename := context.Param("zonename")
+
+	// ensure endcustomer is allowed to access the zone
+	if !EnsureEndcustomer(context, zonename) {
+		return
+	}
+
+	// delete zone
+	ok, err := DnsnodeDeleteZone(zonename)
+
+	// check if zone was deleted
+	if !ok {
+		// Log error
+		Log("Error deleting zone: " + zonename + " Error: " + err.Error())
+		context.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Internal server error: " + err.Error()})
+		return
+	}
+
+	// return success message in body
+	context.IndentedJSON(http.StatusOK, gin.H{"message": "Zone deleted"})
+
+	// remove zone from cache
+	RemoveZoneFromCache(zonename)
+
+}

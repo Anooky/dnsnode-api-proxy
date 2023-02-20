@@ -179,3 +179,15 @@ func DnsnodeCreateZone(zonename string, endcustomer string, masters []Master, pr
 	}
 	return true, nil
 }
+
+func DnsnodeDeleteZone(zonename string) (bool, error) {
+	url := NETNOD_BASE_URL + "zone/" + zonename
+
+	_, err := DnsnodeMakeRequest(url, "DELETE", "")
+
+	// handle error
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+}

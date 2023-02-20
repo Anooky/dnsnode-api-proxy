@@ -33,6 +33,6 @@ func RefreshZoneInCache(zonename string) {
 	ZONECACHE[zonename] = zone
 }
 
-func DeleteZoneFromCache(zonename string) {
+func RemoveZoneFromCache(zonename string) {
 	delete(ZONECACHE, zonename)
 }

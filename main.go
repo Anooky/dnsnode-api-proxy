@@ -33,6 +33,7 @@ func main() {
 	// define routes
 	router.GET("/apiv3/status/:zonename", GetZoneStatus)
 	router.POST("/apiv3/zone", CreateZone)
+	router.DELETE("/apiv3/zone/:zonename", DeleteZone)
 
 	// start server
 	port := 8080
