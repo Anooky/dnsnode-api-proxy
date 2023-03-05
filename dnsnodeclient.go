@@ -59,6 +59,15 @@ type ZoneStatistics struct {
 	Values     []SiteStatistics `json:"values"`
 }
 
+type ZoneAnomalies struct {
+	ConfiguredSites       int          `json:"configured_sites"`
+	ConfiguredDistmasters int          `json:"configured_distmasters"`
+	CurrentSerial         int          `json:"current_serial"`
+	CurrentTimestamp      int          `json:"current_timestamp"`
+	Distmasters           []Distmaster `json:"distmasters"`
+	Sites                 []Site       `json:"sites"`
+}
+
 const NETNOD_BASE_URL = "https://dnsnodeapi.netnod.se/apiv3/"
 
 func DnsnodeMakeRequest(url string, method string, body string) (*http.Response, error) {
@@ -223,5 +232,29 @@ func DnsnodeZoneStatistics(zonename string) ZoneStatistics {
 		log.Fatal(jsonErr)
 	}
 	return zoneStatistics
+
+}
+
+func DnsnodeZoneAnomaliesSerial(zonename string) ZoneAnomalies {
+
+	url := NETNOD_BASE_URL + "anomalies/serial/" + zonename
+
+	res, err := DnsnodeMakeRequest(url, "GET", "")
+	// handle error
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	body, readErr := ioutil.ReadAll(res.Body)
+	if readErr != nil {
+		log.Fatal(readErr)
+	}
+
+	var zoneAnomalies ZoneAnomalies
+	jsonErr := json.Unmarshal(body, &zoneAnomalies)
+	if jsonErr != nil {
+		log.Fatal(jsonErr)
+	}
+	return zoneAnomalies
 
 }

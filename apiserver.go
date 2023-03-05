@@ -132,3 +132,20 @@ func GetZoneStatistics(context *gin.Context) {
 	context.IndentedJSON(http.StatusOK, statistics)
 
 }
+
+// Zone anomalies
+func GetZoneAnomaliesSerial(context *gin.Context) {
+	zonename := context.Param("zonename")
+
+	// ensure endcustomer is allowed to access the zone
+	if !EnsureEndcustomer(context, zonename) {
+		return
+	}
+
+	// get zone anomalies
+	anomalies := DnsnodeZoneAnomaliesSerial(zonename)
+
+	// return anomalies
+	context.IndentedJSON(http.StatusOK, anomalies)
+
+}
