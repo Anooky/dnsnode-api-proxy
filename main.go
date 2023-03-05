@@ -33,6 +33,7 @@ func main() {
 	// define routes
 	router.GET("/apiv3/status/:zonename", GetZoneStatus)
 	router.GET("/apiv3/zone/", GetZones)
+	router.GET("/apiv3/zone/:zonename", GetZone)
 	router.POST("/apiv3/zone", CreateZone)
 	router.DELETE("/apiv3/zone/:zonename", DeleteZone)
 	router.GET("/apiv3/statistics/graph/:zonename", GetZoneStatistics)

@@ -11,6 +11,7 @@ Each endcustomer gets its own Authorization token which is locked to:
 | Method | Endpoint                | Status        | Comment                                     |
 |--------|-------------------------|---------------|---------------------------------------------|
 | *      | /tsig/                  | not supported | endcustomers are not allowed to modify TSIG |
+| GET    | /zone/                  | implemented   |                                             |
 | GET    | /zone/<zone-name>       | implemented   |                                             |
 | PUT    | /zone/<zone-name>       | not supported |                                             |
 | POST   | /zone/<zone-name>       | implemented   |                                             |
@@ -19,5 +20,5 @@ Each endcustomer gets its own Authorization token which is locked to:
 | GET    | /status/<zone-name>     | implemented   |                                             |
 | GET    | /statistics/graph/<zone-name> | implemented |   only available for premium anycast    |
 | GET    | /anomalies/serial/<zone-name>  | implemented   |                                      |
-| GET    | /product/               | not supported |                                             |
+| GET    | /product/               | not supported |  not planned for endcustomers                                           |
 
