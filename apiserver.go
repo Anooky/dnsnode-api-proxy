@@ -115,3 +115,20 @@ func GetZones(context *gin.Context) {
 	context.IndentedJSON(http.StatusOK, zones)
 
 }
+
+// Zone statistics
+func GetZoneStatistics(context *gin.Context) {
+	zonename := context.Param("zonename")
+
+	// ensure endcustomer is allowed to access the zone
+	if !EnsureEndcustomer(context, zonename) {
+		return
+	}
+
+	// get zone statistics
+	statistics := DnsnodeZoneStatistics(zonename)
+
+	// return statistics
+	context.IndentedJSON(http.StatusOK, statistics)
+
+}

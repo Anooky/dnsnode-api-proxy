@@ -49,6 +49,16 @@ type Zonestatus struct {
 	Sites                 []Site       `json:"sites"`
 }
 
+type SiteStatistics struct {
+	Site string    `json:"site"`
+	Qps  []float32 `json:"qps"`
+}
+
+type ZoneStatistics struct {
+	Timestamps []int            `json:"timestamps"`
+	Values     []SiteStatistics `json:"values"`
+}
+
 const NETNOD_BASE_URL = "https://dnsnodeapi.netnod.se/apiv3/"
 
 func DnsnodeMakeRequest(url string, method string, body string) (*http.Response, error) {
@@ -190,4 +200,28 @@ func DnsnodeDeleteZone(zonename string) (bool, error) {
 		return false, err
 	}
 	return true, nil
+}
+
+func DnsnodeZoneStatistics(zonename string) ZoneStatistics {
+
+	url := NETNOD_BASE_URL + "statistics/graph/" + zonename
+
+	res, err := DnsnodeMakeRequest(url, "GET", "")
+	// handle error
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	body, readErr := ioutil.ReadAll(res.Body)
+	if readErr != nil {
+		log.Fatal(readErr)
+	}
+
+	var zoneStatistics ZoneStatistics
+	jsonErr := json.Unmarshal(body, &zoneStatistics)
+	if jsonErr != nil {
+		log.Fatal(jsonErr)
+	}
+	return zoneStatistics
+
 }
