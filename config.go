@@ -13,6 +13,7 @@ type CustomerConfig struct {
 	ForcedMasters   []Master `json:"forcedmasters"`
 	ForcedProduct   string   `json:"forcedproduct"`
 	AllowedIPRanges []string `json:"allowedipranges"`
+	MaxZones        int      `json:"maxzones"`
 }
 
 // the key for each customer config is the SHA512 hash of the customer specific token

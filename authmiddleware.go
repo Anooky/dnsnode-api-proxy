@@ -83,6 +83,7 @@ func TokenAuthMapper() gin.HandlerFunc {
 		c.Set("endcustomer", customerConfig.Endcustomer)
 		c.Set("forcedmasters", customerConfig.ForcedMasters)
 		c.Set("forcedproduct", customerConfig.ForcedProduct)
+		c.Set("maxzones", customerConfig.MaxZones)
 
 	}
 }

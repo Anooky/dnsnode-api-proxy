@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -43,6 +44,12 @@ func GetZoneStatus(context *gin.Context) {
 }
 
 func CreateZone(context *gin.Context) {
+
+	// check if endcustomer is already at the limit of zones
+	if !EnsureEndcustomerZoneLimit(context) {
+		return
+	}
+
 	// parse zone from request body
 	var zone Zone
 	if err := context.ShouldBindJSON(&zone); err != nil {
@@ -164,5 +171,30 @@ func GetZoneAnomaliesSerial(context *gin.Context) {
 
 	// return anomalies
 	context.IndentedJSON(http.StatusOK, anomalies)
+
+}
+
+func EnsureEndcustomerZoneLimit(context *gin.Context) bool {
+
+	// get endcustomer from context
+	endcustomer := context.MustGet("endcustomer").(string)
+
+	// get zones from cache
+	zones := GetZonesFromCache(endcustomer)
+	numzones := len(zones)
+
+	// get max zones from config
+	maxzones := context.MustGet("maxzones").(int)
+
+	// abort if endcustomer is already at the limit of zones
+	if numzones >= maxzones {
+		// build log message with the current number of zones and the maximum using fmt.Sprintf
+		logmsg := fmt.Sprintf("Endcustomer %s already at the limit of zones. Current number of zones: %d. Maximum number of zones: %d", endcustomer, numzones, maxzones)
+		Log(logmsg)
+
+		context.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "Forbidden [Endcustomer already at the limit of zones]"})
+		return false
+	}
+	return true
 
 }
