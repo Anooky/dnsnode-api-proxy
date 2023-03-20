@@ -1,10 +1,13 @@
-This API proxy can be used to proxy Netnod's DNSNODE API to endcustomers. 
+# Netnod DNSNODE API PROXY
 
-Each endcustomer gets its own Authorization token which is locked to:
- - a static end customer id
- - optional fixed product
- - optional fixed list of master servers
- - optional fixed list of tsig keys 
+This API proxy can be used to proxy Netnod's DNSNODE API to endcustomers. This allows end customers to add/remove zones automatically.
+
+Each endcustomer gets its own Authorization token which enforces customer specific settings:
+ - dnsnode end customer id
+ - product
+ - master servers
+ - tsig key
+
 
 # API implementation status
 
