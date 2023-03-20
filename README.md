@@ -19,6 +19,6 @@ Each endcustomer gets its own Authorization token which is locked to:
 | DELETE | /zone/<zone-name>       | implemented   |                                             |
 | GET    | /status/<zone-name>     | implemented   |                                             |
 | GET    | /statistics/graph/<zone-name> | implemented |   only available for premium anycast    |
-| GET    | /anomalies/serial/<zone-name>  | implemented   |                                      |
-| GET    | /product/               | not supported |  not planned for endcustomers                                           |
+| GET    | /anomalies/serial/<zone-name>  | implemented   |  can contain inactive instances      |
+| GET    | /product/               | not supported |  not planned for endcustomers               |
 
