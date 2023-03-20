@@ -1,13 +1,16 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
 
 // this file contains a cache for the zone data
 // the key is the zone name, the value is the zone object
-// the cache is updated every 5 minutes
-// additionally, the cache is updated when a zone is added or deleted
+// the cache is updated when a zone is added or deleted
 
 var ZONECACHE map[string]Zone
+var REFRESHINTERVAL = 4 * time.Hour
 
 func UpdateZoneCache() {
 	// get all zones
@@ -45,4 +48,12 @@ func RefreshZoneInCache(zonename string) {
 
 func RemoveZoneFromCache(zonename string) {
 	delete(ZONECACHE, zonename)
+}
+
+// function to update the zone cache regularly
+func UpdateZoneCacheRegularly() {
+	for {
+		time.Sleep(REFRESHINTERVAL)
+		UpdateZoneCache()
+	}
 }

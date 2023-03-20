@@ -19,6 +19,8 @@ func main() {
 	// update zone cache
 	Log("Updating zone cache...")
 	UpdateZoneCache()
+	// start background process to update zone cache regularly
+	go UpdateZoneCacheRegularly()
 
 	// create router
 	Log("Initializing API Server...")
