@@ -10,6 +10,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+var clientRateLimiter = NewClientRateLimiter(100/60, 100) // 100 requests per minute
+
 func TokenAuthMapper() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// get Bearer Token from header
@@ -63,6 +65,17 @@ func TokenAuthMapper() gin.HandlerFunc {
 		if !ipallowed {
 			Log("IP not allowed: " + c.ClientIP() + " for endcustomer: " + customerConfig.Endcustomer)
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized [IP not allowed]"})
+			return
+		}
+
+		// rate limit: allow maximum 100 requests per minute using the time/rate package
+		// if rate limit is exceeded, return 429
+
+		limiter := clientRateLimiter.getClientLimiter(sha512token)
+
+		if !limiter.Allow() {
+			Log("Rate limit exceeded for endcustomer: " + customerConfig.Endcustomer)
+			c.AbortWithStatusJSON(http.StatusTooManyRequests, gin.H{"error": "Too many requests"})
 			return
 		}
 
