@@ -9,14 +9,13 @@ var DNSNODE_TOKEN string
 var CONFIG Configfile
 
 type CustomerConfig struct {
-	Token           string   `json:"token"`
 	Endcustomer     string   `json:"endcustomer"`
 	ForcedMasters   []Master `json:"forcedmasters"`
 	ForcedProduct   string   `json:"forcedproduct"`
 	AllowedIPRanges []string `json:"allowedipranges"`
 }
 
-// use customer's token as key for customerconfig
+// the key for each customer config is the SHA512 hash of the customer specific token
 type Configfile struct {
 	DNSNodeToken    string                    `json:"dnsnodetoken"`
 	CustomerConfigs map[string]CustomerConfig `json:"customerconfigs"`

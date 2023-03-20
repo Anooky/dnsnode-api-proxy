@@ -1,6 +1,8 @@
 package main
 
 import (
+	"crypto/sha512"
+	"encoding/hex"
 	"net"
 	"net/http"
 	"strings"
@@ -25,14 +27,17 @@ func TokenAuthMapper() gin.HandlerFunc {
 			return
 		}
 		token := strings.Split(authHeader, " ")[1]
+		// get the SHA-512 hash of the token as string and compare it to the config
+		sha512token := GetSHA512Hash(token)
 
 		// check token against config
 		// if token is not found, return 401
 		// if token is found, set endcustomer, tsig, master, product
 
-		customerConfig, ok := CONFIG.CustomerConfigs[token]
+		customerConfig, ok := CONFIG.CustomerConfigs[sha512token]
 
 		if !ok {
+			Log("User provided token is not configured: " + token + " (" + sha512token + ")")
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized [Token not found]"})
 			return
 		}
@@ -67,4 +72,10 @@ func TokenAuthMapper() gin.HandlerFunc {
 		c.Set("forcedproduct", customerConfig.ForcedProduct)
 
 	}
+}
+
+func GetSHA512Hash(input string) string {
+	hash := sha512.Sum512([]byte(input))
+	hashStr := hex.EncodeToString(hash[:])
+	return hashStr
 }
